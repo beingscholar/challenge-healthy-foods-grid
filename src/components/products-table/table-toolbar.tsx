@@ -5,9 +5,10 @@ import { ClearAll } from '@material-ui/icons'
 interface TableToolbarProps {
   numRowSelect: number
   removeSelected: React.MouseEventHandler
+  compareHandler: React.MouseEventHandler
 }
 
-const TableToolbar: React.FC<TableToolbarProps> = ({ numRowSelect, removeSelected }) => {
+const TableToolbar: React.FC<TableToolbarProps> = ({ numRowSelect, removeSelected, compareHandler }) => {
   const rowSelected = numRowSelect === 2
   return (
     <Toolbar variant="dense">
@@ -19,7 +20,7 @@ const TableToolbar: React.FC<TableToolbarProps> = ({ numRowSelect, removeSelecte
           numRowSelect > 1 ? 's' : ''
         } selected`}</Typography>
       )}
-      <Button variant="contained" style={{ marginLeft: 'auto' }} disabled={!rowSelected}>
+      <Button variant="contained" style={{ marginLeft: 'auto' }} disabled={!rowSelected} onClick={compareHandler}>
         {rowSelected ? 'compare products' : 'select 2 products to compare'}
       </Button>
     </Toolbar>

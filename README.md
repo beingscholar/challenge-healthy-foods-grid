@@ -43,8 +43,8 @@ It should work similarly to `git diff` functionality:
 
 Notes:
 - the content of the cell should remain unchanged if the nutrition info is the same for both products (e.g.: same amount of protein);
+![Products Table Rows Diff With Similar Values](public/images/product-with-similar-values.png)
 - the name and tags columns can be ignored for the comparision.
-
 ## Instructions
 
 How to attempt this challenge:

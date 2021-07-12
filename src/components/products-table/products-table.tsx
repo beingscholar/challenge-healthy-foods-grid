@@ -1,8 +1,5 @@
-import React, { useState } from 'react'
+import { ProductId } from '@/api/types'
 import {
-  Box,
-  Button,
-  IconButton,
   Paper,
   Table,
   TableBody,
@@ -13,17 +10,19 @@ import {
   TableRow,
   Typography
 } from '@material-ui/core'
+import React, { useState } from 'react'
 import { ProductsTableProps } from '../types'
-import type { Product, ProductPropertyEntryDTO } from '@/api/types'
+import CompareProducts from './compare-products'
 import Toolbar from './table-toolbar'
-import { ProductId } from '@/api/types'
 
 const ProductsTable: React.FC<ProductsTableProps> = ({ productProperties, products }) => {
-  // TODO Feature 1: Display products in a rich text table
-
+  // Feature 1: Display products in a rich text table
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
   const [selected, setSelected] = useState<ProductId[]>([])
+
+  // Feature 2: Compare two products
+  const [isCompared, setIsCompared] = useState(false)
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage)
@@ -34,12 +33,9 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ productProperties, produc
     setPage(0)
   }
 
-  const isSelected = (productId: ProductId) => {
-    const index = selected.indexOf(productId)
-    return index > -1
-  }
+  const isSelected = (productId: ProductId) => selected.indexOf(productId) !== -1
 
-  const handleSelection = (productId: ProductId) => () => {
+  const handleClick = (event: React.MouseEvent<unknown>, productId: ProductId) => {
     const newSelected = [...selected]
     const selectIndex = newSelected.indexOf(productId)
     if (selectIndex > -1) {
@@ -50,8 +46,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ productProperties, produc
     if (newSelected.length > 2) {
       newSelected.splice(0, 1)
     }
-    // if (newSelected.length < 2) setShowComparison(false)
-
+    if (newSelected.length < 2) setIsCompared(false)
     setSelected(newSelected)
   }
 
@@ -63,9 +58,12 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ productProperties, produc
         numRowSelect={selected.length}
         removeSelected={() => {
           setSelected([])
+          setIsCompared(false)
         }}
+        compareHandler={() => setIsCompared(true)}
       />
-      <TableContainer style={{ width: 1024, height: 440 }}>
+
+      <TableContainer style={{ width: 1170, height: 440 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -73,6 +71,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ productProperties, produc
                 <TableCell key={name}>{label}</TableCell>
               ))}
             </TableRow>
+            {isCompared && <CompareProducts selected={selected} products={products} productProps={productProperties} />}
           </TableHead>
           <TableBody>
             {products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
@@ -82,14 +81,18 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ productProperties, produc
                   role="checkbox"
                   tabIndex={-1}
                   key={product.id}
+                  onClick={(event) => handleClick(event, product.id)}
+                  aria-checked={isSelected(product.id)}
                   selected={isSelected(product.id)}
-                  onClick={handleSelection(product.id)}
                 >
                   {productProperties.map(({ name }) => {
-                    // const value = product[name];
                     return (
                       <TableCell key={name}>
-                        {(name === 'tags' ? product[name]?.join(', ') : product[name]) ?? '-'}
+                        {name === 'tags'
+                          ? product[name]?.join(', ')
+                          : typeof product[name] === 'number'
+                          ? Math.round(Number(product[name]) * 100) / 100
+                          : product[name] ?? '-'}
                       </TableCell>
                     )
                   })}
@@ -110,7 +113,6 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ productProperties, produc
       />
     </Paper>
   )
-  // TODO Feature 2: Compare two products
 }
 
 export default ProductsTable
